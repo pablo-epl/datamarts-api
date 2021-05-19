@@ -1,0 +1,17 @@
+name: Run tests and lintern
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Installing Docker Compose
+        run: pip install docker-compose
+      - name: Testing
+        run: docker-compose run app sh -c "python manage.py test && flake8"
