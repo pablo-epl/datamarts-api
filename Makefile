@@ -1,4 +1,7 @@
 STAGE=dev
+THIS_FILE := $(lastword $(MAKEFILE_LIST))
+
+.NOTPARALLEL:
 
 .DEFAULT_GOAL = help
 
@@ -6,9 +9,26 @@ STAGE=dev
 help: ## Help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf " \033[36m%-20s\033[0m  %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
+.PHONY: build
+build: ## Build a new image
+	docker-compose build
+
+.PHONY: compose-down
+compose-down:
+	docker-compose down
+
+.PHONY: compose-up
+compose-up:
+	docker-compose up
+
 .PHONY: tests
-tests: ## Tests app
+tests:
 	docker-compose run app sh -c "python manage.py test && flake8"
+	$(MAKE) -j1 compose-down
+
+.PHONY: rmc
+rmc:
+	docker rm $(shell docker ps -a -q --filter="name=datamarts-api")
 
 .PHONY: migrations
 migrations: ## Make migrations on the app specified through the argument
@@ -18,12 +38,6 @@ migrations: ## Make migrations on the app specified through the argument
 clean: # Removes all *.pyc files
 	rm -rf $(VENV)
 	find . -type f -name '*.pyc' -delete
-
-.PHONY: deps-install
-deps-install: ## Installs the requirements file into virtual environment repo
-	@echo "🛠Installing deps from requirements.txt🛠"
-	@. $(VENV)/bin/activate; \
-	pip install -r requirements.txt
 
 .PHONY: lint
 lint:  ## lints using flake8
