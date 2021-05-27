@@ -7,7 +7,18 @@ MAINTAINER Pablo Peña
 ENV PYTHONUNBUFFERED 1
 
 COPY ./requirements.txt /requirements.txt
+# In order to be able to install psycopg2, we need to do:
+# It uses the package manager that comes with our alpine
+# APK, add and update the registry(postresql-client) before adding it without cache.
+# best practices so that the container has the less footprint available
+RUN apk add --update --no-cache postgresql-client
+# Set up an alias for our dependencies in order to remove then later
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+		gcc libc-dev linux-headers postgresql-dev
+
 RUN pip install -r /requirements.txt
+
+RUN apk del .tmp-build-deps
 
 # creates an empty folder
 RUN mkdir /app

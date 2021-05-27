@@ -14,4 +14,4 @@ jobs:
       - name: Installing Docker Compose
         run: pip install docker-compose
       - name: Testing
-        run: docker-compose run app sh -c "python manage.py test && flake8"
+        run: make tests
