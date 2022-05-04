@@ -13,18 +13,17 @@ help: ## Help
 build: ## Build a new image
 	docker-compose build
 
-.PHONY: compose-down
-compose-down:
+.PHONY: cdown
+cdown:
 	docker-compose down
 
-.PHONY: compose-up
-compose-up:
+.PHONY: cup
+cup:
 	docker-compose up
 
 .PHONY: tests
 tests:
-	docker-compose run app sh -c "python manage.py wait_for_db && python manage.py test && flake8"
-	$(MAKE) -j1 compose-down
+	docker-compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test && flake8"
 
 .PHONY: rmc
 rmc:
@@ -33,6 +32,9 @@ rmc:
 .PHONY: migrations
 migrations: ## Make migrations on the app specified through the argument
 	docker-compose run app sh -c "python manage.py makemigrations ${appname}"
+
+.PHONY: createsuperuser
+	docker-compose run app sh -c "python  manage.py createsuperuser"
 
 .PHONY: clean
 clean: # Removes all *.pyc files
